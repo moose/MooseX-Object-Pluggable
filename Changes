@@ -1,4 +1,10 @@
 Revision history for MooseX-Object-Pluggable
+0.0003    Jan 19, 2007
+          Forget anon classes, go back to applying to $self
+          goodbye __anon_subclass and _anon_subclass
+	  hello _original_class_name
+	  Props to mst for pointing out the error of my ways
+	  A couple more minor tests
 0.0002    Jan 16, 2007
 	  Forgot Class::Inspector dep on Makefile
 0.0001    Jan 16, 2007

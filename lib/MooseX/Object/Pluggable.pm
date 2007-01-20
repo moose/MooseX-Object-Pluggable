@@ -6,8 +6,7 @@ use warnings;
 use Moose::Role;
 use Class::Inspector;
 
-
-our $VERSION = '0.0002';
+our $VERSION = '0.0003';
 
 =head1 NAME
 
@@ -38,7 +37,7 @@ our $VERSION = '0.0002';
 =head1 DESCRIPTION
 
 This module is meant to be loaded as a role from Moose-based classes
-it will add five methods and five attributes to assist you with the loading
+it will add five methods and four attributes to assist you with the loading
 and handling of plugins and extensions for plugins. I understand that this may
 pollute your namespace, however I took great care in using the least ambiguous
 names possible.
@@ -53,7 +52,11 @@ Plugin methods are allowed to C<around>, C<before>, C<after>
 their consuming classes, so it is important to watch for load order as plugins can
 and will overload each other. You may also add attributes through has.
 
-Even thouch C<override> will work in basic cases, I STRONGLY discourage it's use 
+Please note that when you laod at runtime you lose the ability to wrap C<BUILD>
+and roles using C<has> will not go through comile time checks like C<required>
+and <default>.
+
+Even thouch C<override> will work , I STRONGLY discourage it's use 
 and a warning will be thrown if you try to use it.
 This is closely linked to the way multiple roles being applies is handles and is not
 likely to change. C<override> bevavior is closely linked to inheritance and thus will
@@ -62,23 +65,14 @@ save yourself the headache.
 
 =head1 How plugins are loaded
 
-You don't really need to understand anything except for the first paragraph. 
-
-The first time you load a plugin a new anonymous L<Moose::Meta::Class> will be
-created. This class will inherit from your pluggable object and then your object
-will be reblessed to an instance of this anonymous class. This means that 
+When roles are applied at runtime an anonymous class will wrap your class and
 C<$self-E<gt>blessed> and C<ref $self> will no longer return the name of your object,
-they will instead return the name of the anonymous class created at runtime. Your
-original class name can be located at C<($self-E<gt>meta-E<gt>superclasses)[0]>
+they will instead return the name of the anonymous class created at runtime.
+See C<_original_class_name>.
 
-Once the anonymous subclass exists all plugin roles will be C<apply>ed to this class
-directly. This "subclass" though is in fact now C<$self> and it C<isa($yourclassname)>.
- If this is confusing.. it should be, thats why you let me handle it. Just know that it
-has to be done this way in order for plugins to override core functionality.
+=head1 Usage
 
-=head1
-
-For a simple example see the tests for this distribution.
+For a simple example see the tests included in this distribution.
 
 =head1 Attributes
 
@@ -104,14 +98,6 @@ This means that is _plugin_ns is "MyApp::Plugin" and _plugin_ext_ns is
 HashRef. Keeps an inventory of what plugins are loaded and what the actual
 module name is to avoid multiple loading.
 
-=head2 __plugin_subclass
-
-Object. This holds the subclass of our pluggable object in the form of an
-anonymous L<Moose::Meta::Class> instance. All roles are actually applied to 
-this instance instead of the original class instance in order to not lose
-the original object name as roles are applied. The anonymous class will be
-automatically generated upon first use.
-
 =cut
 
 #--------#---------#---------#---------#---------#---------#---------#---------#
@@ -126,17 +112,14 @@ has _plugin_ext_ns => (is => 'rw', required => 1, isa => 'Str',
 has _plugin_loaded => (is => 'rw', required => 1, isa => 'HashRef', 
 		       default => sub{ {} });
 
-has __plugin_subclass => ( is => 'rw', required => 0, isa => 'Object', );
-
 #--------#---------#---------#---------#---------#---------#---------#---------#
 
 =head1 Public Methods
 
 =head2 load_plugin $plugin
 
-This is the only method you should be using.
-Load the apropriate role for C<$plugin> as well as any 
-extensions it provides if extensions are enabled.
+This is the only method you should be using. Load the apropriate role for 
+C<$plugin> as well as any extensions it provides if extensions are enabled.
 
 =cut
 
@@ -146,7 +129,7 @@ sub load_plugin{
 
     my $loaded = $self->_plugin_loaded;
     return 1 if exists $loaded->{$plugin};
-    
+ 
     my $role = $self->_role_from_plugin($plugin);
 
     $loaded->{$plugin} = $role      if $self->_load_and_apply_role($role);
@@ -186,40 +169,26 @@ sub load_plugin_ext{
     }
 }
 
-=head1 Private Methods
+=head2 _original_class_name
 
-There's nothing stopping you from using these, but if you are using them 
-you are probably doing something wrong.
-
-=head2 _plugin_subclass
-
-Creates, if needed and returns the anonymous instance of the consuming objects 
-subclass to which roles will be applied to.
+Because of the way roles apply C<$self-E<gt>blessed> and C<ref $self> will
+no longer return what you expect. Instead use this class to get your original
+class name.
 
 =cut
 
-sub _plugin_subclass{
+sub _original_class_name{
     my $self = shift;
-    my $anon_class = $self->__plugin_subclass;
-
-    #initialize if we havnt been initialized already.
-    unless(ref $anon_class && $self->meta->is_anon_class){
-
-	#create an anon class that inherits from $self that plugins can be 
-	#applied to safely and store it within the $self instance.
-	$anon_class = Moose::Meta::Class->
-	    create_anon_class(superclasses => [$self->meta->name]);
-	$self->__plugin_subclass( $anon_class );
-
-	#rebless $self as the anon class which now inherits from ourselves
-	#this allows the anon class to override methods in the consuming
-	#class while keeping a stable name and set of superclasses
-	bless $self => $anon_class->name 
-	    unless $self->meta->name eq $anon_class->name;
-    }
-    
-    return $anon_class;
+    return (grep {$_ !~ /^Moose::/} $self->meta->class_precedence_list)[0];
 }
+
+
+=head1 Private Methods
+
+There's nothing stopping you from using these, but if you are using them 
+for anything thats not really complicated you are probably doing 
+something wrong. Some of these may be inlined in the future if performance
+becomes an issue (which I doubt).
 
 =head2 _role_from_plugin $plugin
 
@@ -236,16 +205,16 @@ and C<_plugin_ns> will be returned. Example
 sub _role_from_plugin{
     my ($self, $plugin) = @_;
 
-    my $name = $self->meta->is_anon_class ? 
-	($self->meta->superclasses)[0] : $self->blessed;
+    return $1 if $plugin =~ /^\+(.*)/;
 
-    $plugin =~ /^\+(.*)/ ? $1 : join '::', $name, $self->_plugin_ns, $plugin;
+    return join '::', ( $self->_original_class_name, 
+			$self->_plugin_ns, $plugin );
 }
 
 =head2 _load_and_apply_role $role
 
-Require C<$role> if it is not already loaded and apply it to 
-C<_plugin_subclass>. This is the meat of this module.
+Require C<$role> if it is not already loaded and apply it. This is
+the meat of this module.
 
 =cut
 
@@ -262,17 +231,17 @@ sub _load_and_apply_role{
 	eval "require $role" || die("Failed to load role: $role");
     }
 
+
     carp("Using 'override' is strongly discouraged and may not behave ".
 	 "as you expect it to. Please use 'around'")
 	if scalar keys %{ $role->meta->get_override_method_modifiers_map };   
 
     #apply the plugin to the anon subclass
     die("Failed to apply plugin: $role") 
-	unless $role->meta->apply( $self->_plugin_subclass );
+	unless $role->meta->apply( $self );
 
     return 1;
 }
-
 
 1;
 
@@ -280,7 +249,7 @@ __END__;
 
 =head1 SEE ALSO
 
-L<Moose>, L<Moose::Role>
+L<Moose>, L<Moose::Role>, L<Class::Inspector>
 
 =head1 AUTHOR
 
