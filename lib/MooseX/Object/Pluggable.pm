@@ -6,7 +6,7 @@ use warnings;
 use Moose::Role;
 use Class::Inspector;
 
-our $VERSION = '0.0003';
+our $VERSION = '0.0004';
 
 =head1 NAME
 
@@ -139,7 +139,7 @@ sub load_plugin{
 }
 
 
-=head2 _load_plugin_ext
+=head2 load_plugin_ext
 
 Will load any extensions for a particular plugin. This should be called 
 automatically by C<load_plugin> so you don't need to worry about it.
@@ -242,6 +242,12 @@ sub _load_and_apply_role{
 
     return 1;
 }
+
+=head2 meta
+
+Keep tests happy. See L<Moose>
+
+=cut
 
 1;
 

@@ -1,4 +1,6 @@
 Revision history for MooseX-Object-Pluggable
+0.0004    Jan 23, 2007
+	  PODFixes
 0.0003    Jan 19, 2007
           Forget anon classes, go back to applying to $self
           goodbye __anon_subclass and _anon_subclass
