@@ -52,11 +52,11 @@ Plugin methods are allowed to C<around>, C<before>, C<after>
 their consuming classes, so it is important to watch for load order as plugins can
 and will overload each other. You may also add attributes through has.
 
-Please note that when you laod at runtime you lose the ability to wrap C<BUILD>
+Please note that when you load at runtime you lose the ability to wrap C<BUILD>
 and roles using C<has> will not go through comile time checks like C<required>
 and <default>.
 
-Even thouch C<override> will work , I STRONGLY discourage it's use 
+Even though C<override> will work , I STRONGLY discourage it's use 
 and a warning will be thrown if you try to use it.
 This is closely linked to the way multiple roles being applies is handles and is not
 likely to change. C<override> bevavior is closely linked to inheritance and thus will
