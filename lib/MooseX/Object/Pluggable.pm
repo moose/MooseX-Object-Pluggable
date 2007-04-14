@@ -4,9 +4,10 @@ use Carp;
 use strict;
 use warnings;
 use Moose::Role;
-use Class::Inspector;
+use Class::MOP;
+use Module::Pluggable::Object;
 
-our $VERSION = '0.0004';
+our $VERSION = '0.0005';
 
 =head1 NAME
 
@@ -93,24 +94,39 @@ This means that is _plugin_ns is "MyApp::Plugin" and _plugin_ext_ns is
 "ExtensionFor" loading plugin "Bar" would search for extensions in
 "MyApp::Plugin::Bar::ExtensionFor::*". 
 
-=head2 _plugin_loaded
+=head2 _plugin_app_ns
 
-HashRef. Keeps an inventory of what plugins are loaded and what the actual
-module name is to avoid multiple loading.
+ArrayRef, Accessor automatically dereferences into array on a read call.
+By default will be filled with the class name and it's prescedents, it is used
+to determine which directories to look for plugins as well as which plugins
+take presedence upon namespace collitions. This allows you to subclass a pluggable
+class and still use it's plugins while using yours first if they are available.
+
+=cut
+
+=head2 _plugin_locator
+
+An automatically built instance of L<Module::Pluggable::Object> used to locate
+available plugins.
 
 =cut
 
 #--------#---------#---------#---------#---------#---------#---------#---------#
 
-has _plugin_ns     => (is => 'rw', required => 1, isa => 'Str', 
-                       default => 'Plugin');
-
-has _plugin_ext    => (is => 'rw', required => 1, isa => 'Bool',
-	               default => 1);
-has _plugin_ext_ns => (is => 'rw', required => 1, isa => 'Str', 
-		       default => 'ExtensionFor');
-has _plugin_loaded => (is => 'rw', required => 1, isa => 'HashRef', 
-		       default => sub{ {} });
+has _plugin_ns      => (is => 'rw', required => 1, isa => 'Str', 
+                        default => 'Plugin');
+has _plugin_ext     => (is => 'rw', required => 1, isa => 'Bool',
+	                default => 1);
+has _plugin_ext_ns  => (is => 'rw', required => 1, isa => 'Str', 
+		        default => 'ExtensionFor');
+has _plugin_loaded  => (is => 'rw', required => 1, isa => 'HashRef', 
+		        default => sub{ {} });
+has _plugin_app_ns  => (is => 'rw', required => 1, isa => 'ArrayRef', lazy => 1, 
+                        auto_deref => 1, 
+                        default => sub{ shift->_build_plugin_app_ns });
+has _plugin_locator => (is => 'rw', required => 1, lazy => 1, 
+                        isa => 'Module::Pluggable::Object', 
+		        default => sub{ shift->_build_plugin_locator });
 
 #--------#---------#---------#---------#---------#---------#---------#---------#
 
@@ -129,7 +145,7 @@ sub load_plugin{
 
     my $loaded = $self->_plugin_loaded;
     return 1 if exists $loaded->{$plugin};
- 
+    
     my $role = $self->_role_from_plugin($plugin);
 
     $loaded->{$plugin} = $role      if $self->_load_and_apply_role($role);
@@ -153,15 +169,19 @@ recommend.
 sub load_plugin_ext{
     my ($self, $plugin) = @_;
     die("You must provide a plugin name") unless $plugin;
-    my $role = $self->_role_from_plugin($plugin);
+    my $role = $self->_plugin_loaded->{$plugin};
 
     # $p for plugin, $r for role
     while( my($p,$r) = each %{ $self->_plugin_loaded }){
+
 	my $ext = join "::", $role, $self->_plugin_ext_ns, $p;	
-
-	$self->_load_and_apply_role( $ext ) 
-	    if Class::Inspector->installed($ext);
-
+	if( $plugin =~ /^\+(.*)/ ){
+	    eval{ $self->_load_and_apply_role( $ext ) };
+	} else{
+	    $self->_load_and_apply_role( $ext ) if
+		grep{ /^${ext}$/ } $self->_plugin_locator->plugins;	
+        }
+	
 	#go back to prev loaded modules and load extensions for current module?
 	#my $ext2 = join "::", $r, $self->_plugin_ext_ns, $plugin;
 	#$self->_load_and_apply_role( $ext2 ) 
@@ -194,8 +214,8 @@ becomes an issue (which I doubt).
 
 Creates a role name from a plugin name. If the plugin name is prepended 
 with a C<+> it will be treated as a full name returned as is. Otherwise
-a string consisting of C<$plugin>  prepended with the application name 
-and C<_plugin_ns> will be returned. Example
+a string consisting of C<$plugin>  prepended with the C<_plugin_ns> 
+and the first valid value from C<_plugin_app_ns> will be returned. Example
    
    #assuming appname MyApp and C<_plugin_ns> 'Plugin'   
    $self->_role_from_plugin("MyPlugin"); # MyApp::Plugin::MyPlugin
@@ -205,10 +225,22 @@ and C<_plugin_ns> will be returned. Example
 sub _role_from_plugin{
     my ($self, $plugin) = @_;
 
-    return $1 if $plugin =~ /^\+(.*)/;
+    return $1 if( $plugin =~ /^\+(.*)/ );
 
-    return join '::', ( $self->_original_class_name, 
-			$self->_plugin_ns, $plugin );
+    my $o = join '::', $self->_plugin_ns, $plugin;
+    #Father, please forgive me for I have sinned. 
+    my @roles = grep{ /${o}$/ } $self->_plugin_locator->plugins;
+    
+    die("Unable to locate plugin") unless @roles;
+    return $roles[0] if @roles == 1;
+    
+    my @names = (grep {$_ !~ /^Moose::/} $self->meta->class_precedence_list);
+    my $i = 0;
+    my %presedence_list = map{ $i++; "${_}::${o}", $i } @names;
+    
+    @roles = sort{ $presedence_list{$a} <=> $presedence_list{$b}} @roles;
+
+    return shift @roles;    
 }
 
 =head2 _load_and_apply_role $role
@@ -222,15 +254,10 @@ sub _load_and_apply_role{
     my ($self, $role) = @_;
     die("You must provide a role name") unless $role;
 
-    #Throw exception if plugin is not installed
-    die("$role is not available on this system") 
-	unless Class::Inspector->installed($role);
-
     #don't re-require...
-    unless( Class::Inspector->loaded($role) ){
-	eval "require $role" || die("Failed to load role: $role");
+    unless( Class::MOP::is_class_loaded($role) ){
+	eval Class::MOP::load_class($role) || die("Failed to load role: $role");
     }
-
 
     carp("Using 'override' is strongly discouraged and may not behave ".
 	 "as you expect it to. Please use 'around'")
@@ -241,6 +268,36 @@ sub _load_and_apply_role{
 	unless $role->meta->apply( $self );
 
     return 1;
+}
+
+=head2 _build_plugin_app_ns
+
+Automatically builds the _plugin_app_ns attribute with the classes in the
+class presedence list that are not part of Moose.
+
+=cut
+
+sub _build_plugin_app_ns{
+    my $self = shift;
+    my @names = (grep {$_ !~ /^Moose::/} $self->meta->class_precedence_list);
+    return \@names;
+}
+
+=head2 _build_plugin_locator
+
+Automatically creates a L<Module::Pluggable::Object> instance with the correct
+search_path.
+
+=cut
+
+sub _build_plugin_locator{
+    my $self = shift;
+
+    my $locator = Module::Pluggable::Object->new
+	( search_path => 
+	  [ map { join '::', ($_, $self->_plugin_ns) } $self->_plugin_app_ns ] 
+	);
+    return $locator;    
 }
 
 =head2 meta

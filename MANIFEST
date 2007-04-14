@@ -17,6 +17,7 @@ META.yml
 README
 t/00-load.t
 t/01-basic.t
+t/02-basic2.t
 t/boilerplate.t
 t/lib/TestApp.pm
 t/lib/TestApp/Plugin/Bar.pm
@@ -27,5 +28,9 @@ t/lib/TestApp/Plugin/Bor/ExtensionFor/Foo.pm
 t/lib/TestApp/Plugin/Foo.pm
 t/lib/TestApp/Plugin/Foo/ExtensionFor/Bar.pm
 t/lib/TestApp/Plugin/Foo/ExtensionFor/Baz.pm
+t/lib/TestApp2.pm
+t/lib/TestApp2/Plugin/Foo.pm
+t/lib/TestApp2/Plugin/Foo/ExtensionFor/Bar.pm
+t/lib/TestApp2/Plugin/Foo/ExtensionFor/Baz.pm
 t/pod-coverage.t
 t/pod.t
