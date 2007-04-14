@@ -123,10 +123,15 @@ has _plugin_loaded  => (is => 'rw', required => 1, isa => 'HashRef',
 		        default => sub{ {} });
 has _plugin_app_ns  => (is => 'rw', required => 1, isa => 'ArrayRef', lazy => 1, 
                         auto_deref => 1, 
-                        default => sub{ shift->_build_plugin_app_ns });
+                        default => sub{ shift->_build_plugin_app_ns },
+                        trigger => sub{ $_[0]->_clear_plugin_locator 
+                                         if $_[0]->_has_plugin_locator; },
+                       );
 has _plugin_locator => (is => 'rw', required => 1, lazy => 1, 
-                        isa => 'Module::Pluggable::Object', 
-		        default => sub{ shift->_build_plugin_locator });
+                        isa       => 'Module::Pluggable::Object', 
+		        clearer   => '_clear_plugin_locator',
+                        predicate => '_has_plugin_locator',
+                        default   => sub{ shift->_build_plugin_locator });
 
 #--------#---------#---------#---------#---------#---------#---------#---------#
 
@@ -234,9 +239,8 @@ sub _role_from_plugin{
     die("Unable to locate plugin") unless @roles;
     return $roles[0] if @roles == 1;
     
-    my @names = (grep {$_ !~ /^Moose::/} $self->meta->class_precedence_list);
     my $i = 0;
-    my %presedence_list = map{ $i++; "${_}::${o}", $i } @names;
+    my %presedence_list = map{ $i++; "${_}::${o}", $i } $self->_plugin_app_ns;
     
     @roles = sort{ $presedence_list{$a} <=> $presedence_list{$b}} @roles;
 

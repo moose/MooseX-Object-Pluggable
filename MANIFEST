@@ -18,7 +18,11 @@ README
 t/00-load.t
 t/01-basic.t
 t/02-basic2.t
+t/03-custom-ns.t
 t/boilerplate.t
+t/lib/CustomNS/Plugin/Foo.pm
+t/lib/CustomNS/Plugin/Foo/ExtensionFor/Bar.pm
+t/lib/CustomNS/Plugin/Foo/ExtensionFor/Baz.pm
 t/lib/TestApp.pm
 t/lib/TestApp/Plugin/Bar.pm
 t/lib/TestApp/Plugin/Baz.pm
