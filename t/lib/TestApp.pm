@@ -14,4 +14,6 @@ sub bar{ 'original bar' }
 
 sub bor{ 'original bor' }
 
+__PACKAGE__->meta->make_immutable;
+
 1;

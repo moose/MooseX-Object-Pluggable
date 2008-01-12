@@ -1,4 +1,9 @@
 Revision history for MooseX-Object-Pluggable
+0.0006    Jan 11, 2008
+          Deprecate the Extension mechanism
+          Added load_plugins
+          Test while classes are immutable for good measure.
+          Remove use strict and use warnings. Moose does it for us.
 0.0005    Apr 13, 2007
           Goodbye Class::Inspector, hello Module::Object::Pluggable
           More Tests
