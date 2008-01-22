@@ -1,4 +1,7 @@
 Revision history for MooseX-Object-Pluggable
+0.0007    Jan 22, 2008
+          Fix for Moose 0.34
+
 0.0006    Jan 11, 2008
           Deprecate the Extension mechanism
           Added load_plugins

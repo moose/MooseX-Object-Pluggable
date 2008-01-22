@@ -5,7 +5,7 @@ use Moose::Role;
 use Class::MOP;
 use Module::Pluggable::Object;
 
-our $VERSION = '0.0006';
+our $VERSION = '0.0007';
 
 =head1 NAME
 
@@ -281,16 +281,14 @@ sub _load_and_apply_role{
     my ($self, $role) = @_;
     die("You must provide a role name") unless $role;
 
-    #don't re-require...
-    unless( Class::MOP::is_class_loaded($role) ){
-        eval Class::MOP::load_class($role) || die("Failed to load role: $role");
-    }
+    eval { Class::MOP::load_class($role) };
+    confess("Failed to load role: ${role} $@") if $@;
 
     carp("Using 'override' is strongly discouraged and may not behave ".
          "as you expect it to. Please use 'around'")
         if scalar keys %{ $role->meta->get_override_method_modifiers_map };
-    die("Failed to apply plugin: $role") unless $role->meta->apply( $self );
 
+    $role->meta->apply( $self );
     return 1;
 }
 
