@@ -52,12 +52,12 @@ their consuming classes, so it is important to watch for load order as plugins c
 and will overload each other. You may also add attributes through has.
 
 Please note that when you load at runtime you lose the ability to wrap C<BUILD>
-and roles using C<has> will not go through comile time checks like C<required>
+and roles using C<has> will not go through compile time checks like C<required>
 and <default>.
 
 Even though C<override> will work , I STRONGLY discourage it's use
 and a warning will be thrown if you try to use it.
-This is closely linked to the way multiple roles being applies is handles and is not
+This is closely linked to the way multiple roles being applied is handled and is not
 likely to change. C<override> bevavior is closely linked to inheritance and thus will
 likely not work as you expect it in multiple inheritance situations. Point being,
 save yourself the headache.
