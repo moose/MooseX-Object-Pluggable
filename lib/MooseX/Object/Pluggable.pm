@@ -259,7 +259,7 @@ sub _role_from_plugin{
     #Father, please forgive me for I have sinned.
     my @roles = grep{ /${o}$/ } $self->_plugin_locator->plugins;
 
-    die("Unable to locate plugin") unless @roles;
+    croak("Unable to locate plugin '$plugin'") unless @roles;
     return $roles[0] if @roles == 1;
 
     my $i = 0;
