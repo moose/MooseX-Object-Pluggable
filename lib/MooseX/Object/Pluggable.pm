@@ -144,6 +144,8 @@ has _plugin_locator => (is => 'rw', required => 1, lazy => 1,
 
 =head1 Public Methods
 
+=head2 load_plugins @plugins
+
 =head2 load_plugin $plugin
 
 Load the apropriate role for C<$plugin> as well as any extensions it provides
@@ -151,31 +153,33 @@ if extensions are enabled.
 
 =cut
 
-sub load_plugin{
-    my ($self, $plugin) = @_;
-    die("You must provide a plugin name") unless $plugin;
+sub load_plugins {
+    my ($self, @plugins) = @_;
+    die("You must provide a plugin name") unless @plugins;
 
     my $loaded = $self->_plugin_loaded;
-    return 1 if exists $loaded->{$plugin};
 
-    my $role = $self->_role_from_plugin($plugin);
+    my @load = grep { not exists $loaded->{$_} } @plugins;
 
-    $loaded->{$plugin} = $role      if $self->_load_and_apply_role($role);
-    $self->load_plugin_ext($plugin) if $self->_plugin_ext;
+    my @roles = map { $self->_role_from_plugin($_) } @load;
 
-    return exists $loaded->{$plugin};
+    if ( $self->_load_and_apply_role(@roles) ) {
+        @{ $loaded }{@load} = @roles;
+
+        if ( $self->_plugin_ext ) {
+            $self->load_plugin_ext($_) for @load;
+        }
+
+        return 1;
+    } else {
+        return;
+    }
 }
 
-=head2 load_plugins @plugins
 
-Load all C<@plugins>.
-
-=cut
-
-
-sub load_plugins {
+sub load_plugin {
   my $self = shift;
-  $self->load_plugin($_) for @_;
+  $self->load_plugins(@_);
 }
 
 
@@ -270,7 +274,7 @@ sub _role_from_plugin{
     return shift @roles;
 }
 
-=head2 _load_and_apply_role $role
+=head2 _load_and_apply_role @roles
 
 Require C<$role> if it is not already loaded and apply it. This is
 the meat of this module.
@@ -278,17 +282,20 @@ the meat of this module.
 =cut
 
 sub _load_and_apply_role{
-    my ($self, $role) = @_;
-    die("You must provide a role name") unless $role;
+    my ($self, @roles) = @_;
+    die("You must provide a role name") unless @roles;
 
-    eval { Class::MOP::load_class($role) };
-    confess("Failed to load role: ${role} $@") if $@;
+    foreach my $role ( @roles ) {
+        eval { Class::MOP::load_class($role) };
+        confess("Failed to load role: ${role} $@") if $@;
 
-    carp("Using 'override' is strongly discouraged and may not behave ".
-         "as you expect it to. Please use 'around'")
+        carp("Using 'override' is strongly discouraged and may not behave ".
+            "as you expect it to. Please use 'around'")
         if scalar keys %{ $role->meta->get_override_method_modifiers_map };
+    }
 
-    $role->meta->apply( $self );
+    Moose::Util::apply_all_roles( $self, @roles );
+
     return 1;
 }
 
