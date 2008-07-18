@@ -14,10 +14,6 @@ lib/MooseX/Object/Pluggable.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
-MooseX-Object-Pluggable-0.0009/Changes
-MooseX-Object-Pluggable-0.0009/inc/Module/AutoInstall.pm
-MooseX-Object-Pluggable-0.0009/inc/Module/Install.pm
-MooseX-Object-Pluggable-0.0009/inc/Module/Install/AutoInstall.pm
 README
 t/00-load.t
 t/01-basic.t
