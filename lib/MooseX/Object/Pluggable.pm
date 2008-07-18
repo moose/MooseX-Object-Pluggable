@@ -5,7 +5,7 @@ use Moose::Role;
 use Class::MOP;
 use Module::Pluggable::Object;
 
-our $VERSION = '0.0008';
+our $VERSION = '0.0009';
 
 =head1 NAME
 

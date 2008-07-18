@@ -1,7 +1,7 @@
 Revision history for MooseX-Object-Pluggable
-0.0008    
-          Cleanup Aattribute declarations
-          Eliminate extension mechanisms
+0.0008    Jul 18, 2008
+          Cleanup Attribute declarations
+          Eliminate extension mechanisms and the tests
 
 0.0007    Jan 22, 2008
           Fix for Moose 0.34
