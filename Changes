@@ -1,4 +1,8 @@
 Revision history for MooseX-Object-Pluggable
+0.0009
+          Avoid throwing an error when load_plugins is called on already-loaded
+              plugins
+
 0.0008    Jul 18, 2008
           Cleanup Attribute declarations
           Eliminate extension mechanisms and the tests
