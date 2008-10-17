@@ -156,6 +156,8 @@ sub load_plugins {
     my @load = grep { not exists $loaded->{$_} } @plugins;
     my @roles = map { $self->_role_from_plugin($_) } @load;
 
+    return if @roles == 0;
+
     if ( $self->_load_and_apply_role(@roles) ) {
         @{ $loaded }{@load} = @roles;
         return 1;
