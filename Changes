@@ -1,5 +1,5 @@
 Revision history for MooseX-Object-Pluggable
-0.0009
+0.0009    Nov 25, 2008
           Avoid throwing an error when load_plugins is called on already-loaded
               plugins
 
