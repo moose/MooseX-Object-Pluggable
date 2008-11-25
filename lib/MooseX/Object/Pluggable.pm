@@ -345,6 +345,8 @@ L<http://search.cpan.org/dist/MooseX-Object-Pluggable>
 
 =item Stevan Little - EVERYTHING. Without him this would have never happened.
 
+=item Shawn M Moore - bugfixes
+
 =back
 
 =head1 COPYRIGHT
