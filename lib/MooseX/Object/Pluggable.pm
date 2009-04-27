@@ -3,9 +3,10 @@ package MooseX::Object::Pluggable;
 use Carp;
 use Moose::Role;
 use Class::MOP;
+use Scalar::Util 'blessed';
 use Module::Pluggable::Object;
 
-our $VERSION = '0.0009';
+our $VERSION = '0.00010';
 
 =head1 NAME
 
@@ -87,54 +88,62 @@ to determine which directories to look for plugins as well as which plugins
 take presedence upon namespace collitions. This allows you to subclass a pluggable
 class and still use it's plugins while using yours first if they are available.
 
-=cut
-
 =head2 _plugin_locator
 
 An automatically built instance of L<Module::Pluggable::Object> used to locate
 available plugins.
 
+=head2 _original_class_name
+
+Because of the way roles apply C<$self-E<gt>blessed> and C<ref $self> will
+no longer return what you expect. Instead, upon instantiation, the name of the
+class instantiated will be stored in this attribute if you need to access the
+name the class held before any runtime roles were applied.
+
 =cut
 
 #--------#---------#---------#---------#---------#---------#---------#---------#
 
-has _plugin_ns =>
-  (
-   is => 'rw',
-   required => 1,
-   isa => 'Str',
-   default => sub{ 'Plugin' },
-  );
+has _plugin_ns => (
+  is => 'rw',
+  required => 1,
+  isa => 'Str',
+  default => sub{ 'Plugin' },
+);
 
-has _plugin_loaded =>
-  (
-   is => 'rw',
-   required => 1,
-   isa => 'HashRef',
-   default => sub{ {} }
-  );
+has _original_class_name => (
+  is => 'ro',
+  required => 1,
+  isa => 'Str',
+  default => sub{ blessed($_[0]) },
+);
 
-has _plugin_app_ns =>
-  (
-   is => 'rw',
-   required => 1,
-   isa => 'ArrayRef',
-   lazy => 1,
-   auto_deref => 1,
-   builder => '_build_plugin_app_ns',
-   trigger => sub{ $_[0]->_clear_plugin_locator if $_[0]->_has_plugin_locator; },
-  );
+has _plugin_loaded => (
+  is => 'rw',
+  required => 1,
+  isa => 'HashRef',
+  default => sub{ {} }
+);
 
-has _plugin_locator =>
-  (
-   is => 'rw',
-   required => 1,
-   lazy => 1,
-   isa => 'Module::Pluggable::Object',
-   clearer => '_clear_plugin_locator',
-   predicate => '_has_plugin_locator',
-   builder => '_build_plugin_locator'
-  );
+has _plugin_app_ns => (
+  is => 'rw',
+  required => 1,
+  isa => 'ArrayRef',
+  lazy => 1,
+  auto_deref => 1,
+  builder => '_build_plugin_app_ns',
+  trigger => sub{ $_[0]->_clear_plugin_locator if $_[0]->_has_plugin_locator; },
+);
+
+has _plugin_locator => (
+  is => 'rw',
+  required => 1,
+  lazy => 1,
+  isa => 'Module::Pluggable::Object',
+  clearer => '_clear_plugin_locator',
+  predicate => '_has_plugin_locator',
+  builder => '_build_plugin_locator'
+);
 
 #--------#---------#---------#---------#---------#---------#---------#---------#
 
@@ -171,20 +180,6 @@ sub load_plugin {
   my $self = shift;
   $self->load_plugins(@_);
 }
-
-=head2 _original_class_name
-
-Because of the way roles apply C<$self-E<gt>blessed> and C<ref $self> will
-no longer return what you expect. Instead use this class to get your original
-class name.
-
-=cut
-
-sub _original_class_name{
-    my $self = shift;
-    return (grep {$_ !~ /^Moose::/} $self->meta->class_precedence_list)[0];
-}
-
 
 =head1 Private Methods
 

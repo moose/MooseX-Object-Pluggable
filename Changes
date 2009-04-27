@@ -1,4 +1,7 @@
 Revision history for MooseX-Object-Pluggable
+0.0010    Apr 27, 2009
+          Change how _original_class_name works so it sucks less.
+
 0.0009    Nov 25, 2008
           Avoid throwing an error when load_plugins is called on already-loaded
               plugins
