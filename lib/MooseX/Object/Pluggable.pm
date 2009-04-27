@@ -6,7 +6,7 @@ use Class::MOP;
 use Scalar::Util 'blessed';
 use Module::Pluggable::Object;
 
-our $VERSION = '0.00010';
+our $VERSION = '0.0011';
 
 =head1 NAME
 
