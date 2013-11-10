@@ -1,6 +1,7 @@
 Revision history for MooseX-Object-Pluggable
 
           - removed use of deprecated Class::MOP::load_class
+          - repository migrated from shadowcat to the github moose organization
 
 0.0011    Apr 27, 2009
           Version number FAIL on last release
