@@ -209,9 +209,9 @@ sub _role_from_plugin{
     return $roles[0] if @roles == 1;
 
     my $i = 0;
-    my %presedence_list = map{ $i++; "${_}::${o}", $i } $self->_plugin_app_ns;
+    my %precedence_list = map{ $i++; "${_}::${o}", $i } $self->_plugin_app_ns;
 
-    @roles = sort{ $presedence_list{$a} <=> $presedence_list{$b}} @roles;
+    @roles = sort{ $precedence_list{$a} <=> $precedence_list{$b}} @roles;
 
     return shift @roles;
 }
