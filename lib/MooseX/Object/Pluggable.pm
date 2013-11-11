@@ -54,7 +54,7 @@ and <default>.
 Even though C<override> will work , I STRONGLY discourage it's use
 and a warning will be thrown if you try to use it.
 This is closely linked to the way multiple roles being applied is handled and is not
-likely to change. C<override> bevavior is closely linked to inheritance and thus will
+likely to change. C<override> behavior is closely linked to inheritance and thus will
 likely not work as you expect it in multiple inheritance situations. Point being,
 save yourself the headache.
 
@@ -78,9 +78,9 @@ String. The prefix to use for plugin names provided. MyApp::Plugin is sensible.
 =head2 _plugin_app_ns
 
 ArrayRef, Accessor automatically dereferences into array on a read call.
-By default will be filled with the class name and it's prescedents, it is used
+By default will be filled with the class name and its precedents, it is used
 to determine which directories to look for plugins as well as which plugins
-take presedence upon namespace collitions. This allows you to subclass a pluggable
+take precedence upon namespace collisions. This allows you to subclass a pluggable
 class and still use it's plugins while using yours first if they are available.
 
 =head2 _plugin_locator
@@ -89,6 +89,8 @@ An automatically built instance of L<Module::Pluggable::Object> used to locate
 available plugins.
 
 =head2 _original_class_name
+
+=for stopwords instantiation
 
 Because of the way roles apply C<$self-E<gt>blessed> and C<ref $self> will
 no longer return what you expect. Instead, upon instantiation, the name of the
@@ -148,7 +150,7 @@ has _plugin_locator => (
 
 =head2 load_plugin $plugin
 
-Load the apropriate role for C<$plugin>.
+Load the appropriate role for C<$plugin>.
 
 =cut
 
@@ -179,7 +181,7 @@ sub load_plugin {
 =head1 Private Methods
 
 There's nothing stopping you from using these, but if you are using them
-for anything thats not really complicated you are probably doing
+for anything that's not really complicated you are probably doing
 something wrong.
 
 =head2 _role_from_plugin $plugin
@@ -242,7 +244,7 @@ sub _load_and_apply_role{
 =head2 _build_plugin_app_ns
 
 Automatically builds the _plugin_app_ns attribute with the classes in the
-class presedence list that are not part of Moose.
+class precedence list that are not part of Moose.
 
 =cut
 
@@ -301,6 +303,8 @@ You can find documentation for this module with the perldoc command.
 
 You can also look for information at:
 
+=for stopwords AnnoCPAN
+
 =over 4
 
 =item * AnnoCPAN: Annotated CPAN documentation
@@ -322,6 +326,8 @@ L<http://search.cpan.org/dist/MooseX-Object-Pluggable>
 =back
 
 =head1 ACKNOWLEDGEMENTS
+
+=for stopwords Stevan
 
 =over 4
 
