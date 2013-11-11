@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.0012    2013-11-11 03:59:19Z
           - removed use of deprecated Class::MOP::load_class
           - repository migrated from shadowcat to the github moose organization
 
