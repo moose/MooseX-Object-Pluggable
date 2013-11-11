@@ -1,16 +1,11 @@
 package MooseX::Object::Pluggable;
+# ABSTRACT: Make your classes pluggable
 
 use Carp;
 use Moose::Role;
 use Class::Load 'load_class';
 use Scalar::Util 'blessed';
 use Module::Pluggable::Object;
-
-our $VERSION = '0.0011';
-
-=head1 NAME
-
-    MooseX::Object::Pluggable - Make your classes pluggable
 
 =head1 SYNOPSIS
 
@@ -288,17 +283,13 @@ __END__;
 
 L<Moose>, L<Moose::Role>, L<Class::Inspector>
 
-=head1 AUTHOR
-
-Guillermo Roditi, <groditi@cpan.org>
-
 =head1 BUGS
 
 Holler?
 
 Please report any bugs or feature requests to
-C<bug-moosex-object-pluggable at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=MooseX-Object-Pluggable>.
+C<bug-MooseX-Object-Pluggable at rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org/Public/Dist/Display.html?Name=MooseX-Object-Pluggable>.
 I will be notified, and then you'll automatically be notified of progress on
 your bug as I make changes.
 
@@ -343,11 +334,5 @@ L<http://search.cpan.org/dist/MooseX-Object-Pluggable>
 =item Shawn M Moore - bugfixes
 
 =back
-
-=head1 COPYRIGHT
-
-Copyright 2007 Guillermo Roditi.  All Rights Reserved.  This is
-free software; you may redistribute it and/or modify it under the same
-terms as Perl itself.
 
 =cut
