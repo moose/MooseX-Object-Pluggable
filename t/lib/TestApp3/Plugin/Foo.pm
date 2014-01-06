@@ -1,7 +1,7 @@
 package TestApp3::Plugin::Foo;
 
 use Moose::Role;
-use Some::Noneexisting::Module;
+use TestApp3::Missing;
 
 use warnings;
 use strict;
