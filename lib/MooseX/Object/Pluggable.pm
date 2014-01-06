@@ -3,7 +3,7 @@ package MooseX::Object::Pluggable;
 
 use Carp;
 use Moose::Role;
-use Class::Load 'load_class';
+use Class::Load 'try_load_class';
 use Scalar::Util 'blessed';
 use Module::Pluggable::Object;
 
@@ -150,7 +150,8 @@ has _plugin_locator => (
 
 =head2 load_plugin $plugin
 
-Load the appropriate role for C<$plugin>.
+Load the appropriate role for C<$plugin>. Returns true if at least
+some of the given plugins were loaded successfully.
 
 =cut
 
@@ -159,17 +160,15 @@ sub load_plugins {
     die("You must provide a plugin name") unless @plugins;
 
     my $loaded = $self->_plugin_loaded;
-    my @load = grep { not exists $loaded->{$_} } @plugins;
-    my @roles = map { $self->_role_from_plugin($_) } @load;
-
-    return if @roles == 0;
-
-    if ( $self->_load_and_apply_role(@roles) ) {
-        @{ $loaded }{@load} = @roles;
-        return 1;
-    } else {
-        return;
+    my $success;
+    for my $name (grep { not exists $loaded->{$_} } @plugins) {
+        my $role = $self->_role_from_plugin($name);
+        if ( $self->_load_and_apply_role($role) ) {
+            $loaded->{$name} = $role;
+            $success++;
+        }
     }
+    return $success;
 }
 
 
@@ -216,28 +215,27 @@ sub _role_from_plugin{
     return shift @roles;
 }
 
-=head2 _load_and_apply_role @roles
+=head2 _load_and_apply_role $role
 
 Require C<$role> if it is not already loaded and apply it. This is
 the meat of this module.
 
 =cut
 
-sub _load_and_apply_role{
-    my ($self, @roles) = @_;
-    die("You must provide a role name") unless @roles;
+sub _load_and_apply_role {
+    my ($self, $role) = @_;
+    die "You must provide a role name" unless $role;
 
-    foreach my $role ( @roles ) {
-        eval { load_class($role) };
-        confess("Failed to load role: ${role} $@") if $@;
-
-        carp("Using 'override' is strongly discouraged and may not behave ".
-            "as you expect it to. Please use 'around'")
-        if scalar keys %{ $role->meta->get_override_method_modifiers_map };
+    unless (try_load_class($role)) {
+        warn "Failed to load role: ${role}\n";
+        return;
     }
 
-    Moose::Util::apply_all_roles( $self, @roles );
+    carp("Using 'override' is strongly discouraged and may not behave ".
+         "as you expect it to. Please use 'around'")
+      if scalar keys %{ $role->meta->get_override_method_modifiers_map };
 
+    Moose::Util::apply_all_roles( $self, $role );
     return 1;
 }
 
