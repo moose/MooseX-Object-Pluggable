@@ -3,7 +3,7 @@ package MooseX::Object::Pluggable;
 
 use Carp;
 use Moose::Role;
-use Class::Load 'load_class';
+use Class::Load 'try_load_class';
 use Scalar::Util 'blessed';
 use Module::Pluggable::Object;
 
@@ -227,18 +227,23 @@ sub _load_and_apply_role{
     my ($self, @roles) = @_;
     die("You must provide a role name") unless @roles;
 
+    my @success;
     foreach my $role ( @roles ) {
-        eval { load_class($role) };
-        confess("Failed to load role: ${role} $@") if $@;
+        unless (try_load_class($role)) {
+            warn "Failed to load role: ${role}\n";
+            next;
+        }
 
         carp("Using 'override' is strongly discouraged and may not behave ".
             "as you expect it to. Please use 'around'")
         if scalar keys %{ $role->meta->get_override_method_modifiers_map };
+
+        push @success, $role;
     }
 
-    Moose::Util::apply_all_roles( $self, @roles );
+    Moose::Util::apply_all_roles( $self, @success ) if @success;
 
-    return 1;
+    return scalar @success;
 }
 
 =head2 _build_plugin_app_ns
