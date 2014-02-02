@@ -4,7 +4,7 @@ MooseX::Object::Pluggable - Make your classes pluggable
 
 # VERSION
 
-version 0.0012
+version 0.0013
 
 # SYNOPSIS
 
@@ -30,8 +30,8 @@ version 0.0012
 
 # DESCRIPTION
 
-This module is meant to be loaded as a role from Moose-based classes
-it will add five methods and four attributes to assist you with the loading
+This module is meant to be loaded as a role from Moose-based classes.
+It will add five methods and four attributes to assist you with the loading
 and handling of plugins and extensions for plugins. I understand that this may
 pollute your namespace, however I took great care in using the least ambiguous
 names possible.
@@ -44,13 +44,13 @@ one instance of a class they can all have different plugins loaded. This is a fe
 
 Plugin methods are allowed to `around`, `before`, `after`
 their consuming classes, so it is important to watch for load order as plugins can
-and will overload each other. You may also add attributes through has.
+and will overload each other. You may also add attributes through `has`.
 
 Please note that when you load at runtime you lose the ability to wrap `BUILD`
 and roles using `has` will not go through compile time checks like `required`
-and <default>.
+and `default`.
 
-Even though `override` will work , I STRONGLY discourage it's use
+Even though `override` will work, I __STRONGLY__ discourage its use
 and a warning will be thrown if you try to use it.
 This is closely linked to the way multiple roles being applied is handled and is not
 likely to change. `override` behavior is closely linked to inheritance and thus will
@@ -60,7 +60,8 @@ save yourself the headache.
 # How plugins are loaded
 
 When roles are applied at runtime an anonymous class will wrap your class and
-`$self->blessed` and `ref $self` will no longer return the name of your object,
+`$self->blessed`, `ref $self` and `$self->meta->name`
+will no longer return the name of your object;
 they will instead return the name of the anonymous class created at runtime.
 See `_original_class_name`.
 
@@ -72,24 +73,25 @@ For a simple example see the tests included in this distribution.
 
 ## \_plugin\_ns
 
-String. The prefix to use for plugin names provided. MyApp::Plugin is sensible.
+String. The prefix to use for plugin names provided. `MyApp::Plugin` is sensible.
 
 ## \_plugin\_app\_ns
 
-ArrayRef, Accessor automatically dereferences into array on a read call.
-By default will be filled with the class name and its precedents, it is used
+An ArrayRef accessor that automatically dereferences into array on a read call.
+By default it will be filled with the class name and its precedents. It is used
 to determine which directories to look for plugins as well as which plugins
 take precedence upon namespace collisions. This allows you to subclass a pluggable
-class and still use it's plugins while using yours first if they are available.
+class and still use its plugins while using yours first if they are available.
 
 ## \_plugin\_locator
 
-An automatically built instance of [Module::Pluggable::Object](http://search.cpan.org/perldoc?Module::Pluggable::Object) used to locate
+An automatically built instance of [Module::Pluggable::Object](https://metacpan.org/pod/Module::Pluggable::Object) used to locate
 available plugins.
 
 ## \_original\_class\_name
 
-Because of the way roles apply `$self->blessed` and `ref $self` will
+Because of the way roles apply, `$self->blessed`, `ref $self`
+and `$self->meta->name` will
 no longer return what you expect. Instead, upon instantiation, the name of the
 class instantiated will be stored in this attribute if you need to access the
 name the class held before any runtime roles were applied.
@@ -130,16 +132,16 @@ class precedence list that are not part of Moose.
 
 ## \_build\_plugin\_locator
 
-Automatically creates a [Module::Pluggable::Object](http://search.cpan.org/perldoc?Module::Pluggable::Object) instance with the correct
+Automatically creates a [Module::Pluggable::Object](https://metacpan.org/pod/Module::Pluggable::Object) instance with the correct
 search\_path.
 
 ## meta
 
-Keep tests happy. See [Moose](http://search.cpan.org/perldoc?Moose)
+Keep tests happy. See [Moose](https://metacpan.org/pod/Moose)
 
 # SEE ALSO
 
-[Moose](http://search.cpan.org/perldoc?Moose), [Moose::Role](http://search.cpan.org/perldoc?Moose::Role), [Class::Inspector](http://search.cpan.org/perldoc?Class::Inspector)
+[Moose](https://metacpan.org/pod/Moose), [Moose::Role](https://metacpan.org/pod/Moose::Role), [Class::Inspector](https://metacpan.org/pod/Class::Inspector)
 
 # BUGS
 
@@ -177,7 +179,7 @@ You can also look for information at:
 
 # ACKNOWLEDGEMENTS
 
-- \#Moose - Huge number of questions
+- #Moose - Huge number of questions
 - Matt S Trout <mst@shadowcatsystems.co.uk> - ideas / planning.
 - Stevan Little - EVERYTHING. Without him this would have never happened.
 - Shawn M Moore - bugfixes
@@ -192,3 +194,12 @@ This software is copyright (c) 2007 by Guillermo Roditi <groditi@cpan.org>.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
+
+# CONTRIBUTORS
+
+- David Steinbrunner <dsteinbrunner@pobox.com>
+- Karen Etheridge <ether@cpan.org>
+- Robert Boone <robo4288@gmail.com>
+- Shawn M Moore <sartak@gmail.com>
+- Todd Hepler <thepler@employees.org>
+- Yuval Kogman <nothingmuch@woobling.org>

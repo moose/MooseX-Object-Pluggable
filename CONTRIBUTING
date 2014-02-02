@@ -50,12 +50,12 @@ Once installed, here are some dzil commands you might try:
   $ dzil test --release
   $ dzil xtest
   $ dzil listdeps --json
-  $ dzil build --not
+  $ dzil build --notgz
 
 You can learn more about Dist::Zilla at http://dzil.org/.
 
-The code for this distribution is hosted at GitHub. The main repository is:
-https://github.com/moose/MooseX-Object-Pluggable.
+The code for this distribution is hosted at GitHub. The repository is:
+https://github.com/moose/MooseX-Object-Pluggable
 You can submit code changes by forking the repository, pushing your code
 changes to your clone, and then submitting a pull request. Detailed
 instructions for doing that is available here:
@@ -67,8 +67,12 @@ If you have found a bug, but do not have an accompanying patch to fix it, you
 can submit an issue report here:
 https://rt.cpan.org/Public/Dist/Display.html?Name=MooseX-Object-Pluggable
 or via bug-MooseX-Object-Pluggable@rt.cpan.org.
-This is also a good place to send your questions about the usage of this distribution.
+
+There is also a mailing list available for users of this distribution, at
+http://lists.perl.org/list/moose.html.
+There is also an irc channel available for users of this distribution, at
+irc://irc.perl.org/#moose.
 
 
-This file was generated via Dist::Zilla::Plugin::GenerateFile::ShareDir 0.002 from a
-template file originating in Dist-Zilla-PluginBundle-Author-ETHER-0.039.
+This file was generated via Dist::Zilla::Plugin::GenerateFile::ShareDir 0.005 from a
+template file originating in Dist-Zilla-PluginBundle-Author-ETHER-0.049.
