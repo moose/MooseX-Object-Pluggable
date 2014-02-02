@@ -6,6 +6,7 @@ use Moose::Role;
 use Class::Load 'load_class';
 use Scalar::Util 'blessed';
 use Module::Pluggable::Object;
+use Moose::Util 'find_meta';
 use namespace::autoclean;
 
 =head1 SYNOPSIS
@@ -233,6 +234,9 @@ sub _load_and_apply_role{
     foreach my $role ( @roles ) {
         eval { load_class($role) };
         confess("Failed to load role: ${role} $@") if $@;
+
+        croak("Your plugin '$role' must be a Moose::Role")
+            unless find_meta($role)->isa('Moose::Meta::Role');
 
         carp("Using 'override' is strongly discouraged and may not behave ".
             "as you expect it to. Please use 'around'")

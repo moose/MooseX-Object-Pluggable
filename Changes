@@ -3,6 +3,7 @@ Revision history for {{$dist->name}}
 {{$NEXT}}
           - line numbers in shipped code are now almost the same (within 3) as
             the repository source, for easier debugging
+          - add error diagnostic if the plugin is not a Moose role (RT#49507)
 
 0.0012    2013-11-11 03:59:19Z
           - removed use of deprecated Class::MOP::load_class
