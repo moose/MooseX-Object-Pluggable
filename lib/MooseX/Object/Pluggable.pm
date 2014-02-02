@@ -3,7 +3,7 @@ package MooseX::Object::Pluggable;
 
 use Carp;
 use Moose::Role;
-use Class::Load 'load_class';
+use Module::Runtime 'use_module';
 use Scalar::Util 'blessed';
 use Module::Pluggable::Object;
 use Moose::Util 'find_meta';
@@ -232,7 +232,7 @@ sub _load_and_apply_role{
     die("You must provide a role name") unless @roles;
 
     foreach my $role ( @roles ) {
-        eval { load_class($role) };
+        eval { use_module($role) };
         confess("Failed to load role: ${role} $@") if $@;
 
         croak("Your plugin '$role' must be a Moose::Role")
