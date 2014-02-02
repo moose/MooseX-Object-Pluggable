@@ -6,6 +6,7 @@ use Moose::Role;
 use Class::Load 'load_class';
 use Scalar::Util 'blessed';
 use Module::Pluggable::Object;
+use namespace::autoclean;
 
 =head1 SYNOPSIS
 
