@@ -163,17 +163,19 @@ sub load_plugins {
     die("You must provide a plugin name") unless @plugins;
 
     my $loaded = $self->_plugin_loaded;
-    my @load = grep { not exists $loaded->{$_} } @plugins;
-    my @roles = map { $self->_role_from_plugin($_) } @load;
+    @plugins = grep { not exists $loaded->{$_} } @plugins;
 
-    return if @roles == 0;
+    return if @plugins == 0;
 
-    if ( $self->_load_and_apply_role(@roles) ) {
-        @{ $loaded }{@load} = @roles;
-        return 1;
-    } else {
-        return;
+    foreach my $plugin (@plugins)
+    {
+        my $role = $self->_role_from_plugin($plugin);
+        return if not $self->_load_and_apply_role($role);
+
+        $loaded->{$plugin} = $role;
     }
+
+    return 1;
 }
 
 
@@ -227,23 +229,21 @@ the meat of this module.
 
 =cut
 
-sub _load_and_apply_role{
-    my ($self, @roles) = @_;
-    die("You must provide a role name") unless @roles;
+sub _load_and_apply_role {
+    my ($self, $role) = @_;
+    die("You must provide a role name") unless $role;
 
-    foreach my $role ( @roles ) {
-        eval { use_module($role) };
-        confess("Failed to load role: ${role} $@") if $@;
+    eval { use_module($role) };
+    confess("Failed to load role: ${role} $@") if $@;
 
-        croak("Your plugin '$role' must be a Moose::Role")
-            unless find_meta($role)->isa('Moose::Meta::Role');
+    croak("Your plugin '$role' must be a Moose::Role")
+        unless find_meta($role)->isa('Moose::Meta::Role');
 
-        carp("Using 'override' is strongly discouraged and may not behave ".
-            "as you expect it to. Please use 'around'")
-        if scalar keys %{ $role->meta->get_override_method_modifiers_map };
-    }
+    carp("Using 'override' is strongly discouraged and may not behave ".
+        "as you expect it to. Please use 'around'")
+    if scalar keys %{ $role->meta->get_override_method_modifiers_map };
 
-    Moose::Util::apply_all_roles( $self, @roles );
+    Moose::Util::apply_all_roles( $self, $role );
 
     return 1;
 }

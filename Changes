@@ -5,6 +5,8 @@ Revision history for {{$dist->name}}
             the repository source, for easier debugging
           - add error diagnostic if the plugin is not a Moose role (RT#49507)
           - avoid continuing on after failing to load a plugin (RT#63013)
+          - keep track of all plugins successfully loaded so far in case we
+            fail in the middle (RT#88562)
 
 0.0012    2013-11-11 03:59:19Z
           - removed use of deprecated Class::MOP::load_class
