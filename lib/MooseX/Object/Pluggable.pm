@@ -5,6 +5,7 @@ use Carp;
 use Moose::Role;
 use Module::Runtime 'use_module';
 use Scalar::Util 'blessed';
+use Try::Tiny;
 use Module::Pluggable::Object;
 use Moose::Util 'find_meta';
 use namespace::autoclean;
@@ -233,8 +234,8 @@ sub _load_and_apply_role {
     my ($self, $role) = @_;
     die("You must provide a role name") unless $role;
 
-    eval { use_module($role) };
-    confess("Failed to load role: ${role} $@") if $@;
+    try { use_module($role) }
+    catch { confess("Failed to load role: ${role} $_") };
 
     croak("Your plugin '$role' must be a Moose::Role")
         unless find_meta($role)->isa('Moose::Meta::Role');
