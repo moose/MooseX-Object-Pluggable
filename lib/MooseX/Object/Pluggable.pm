@@ -31,8 +31,8 @@ use Module::Pluggable::Object;
 
 =head1 DESCRIPTION
 
-This module is meant to be loaded as a role from Moose-based classes
-it will add five methods and four attributes to assist you with the loading
+This module is meant to be loaded as a role from Moose-based classes.
+It will add five methods and four attributes to assist you with the loading
 and handling of plugins and extensions for plugins. I understand that this may
 pollute your namespace, however I took great care in using the least ambiguous
 names possible.
@@ -45,13 +45,13 @@ one instance of a class they can all have different plugins loaded. This is a fe
 
 Plugin methods are allowed to C<around>, C<before>, C<after>
 their consuming classes, so it is important to watch for load order as plugins can
-and will overload each other. You may also add attributes through has.
+and will overload each other. You may also add attributes through C<has>.
 
 Please note that when you load at runtime you lose the ability to wrap C<BUILD>
 and roles using C<has> will not go through compile time checks like C<required>
-and <default>.
+and C<default>.
 
-Even though C<override> will work , I STRONGLY discourage it's use
+Even though C<override> will work, I B<STRONGLY> discourage its use
 and a warning will be thrown if you try to use it.
 This is closely linked to the way multiple roles being applied is handled and is not
 likely to change. C<override> behavior is closely linked to inheritance and thus will
@@ -61,7 +61,8 @@ save yourself the headache.
 =head1 How plugins are loaded
 
 When roles are applied at runtime an anonymous class will wrap your class and
-C<$self-E<gt>blessed> and C<ref $self> will no longer return the name of your object,
+C<< $self->blessed >>, C<< ref $self >> and C<< $self->meta->name >>
+will no longer return the name of your object;
 they will instead return the name of the anonymous class created at runtime.
 See C<_original_class_name>.
 
@@ -73,15 +74,15 @@ For a simple example see the tests included in this distribution.
 
 =head2 _plugin_ns
 
-String. The prefix to use for plugin names provided. MyApp::Plugin is sensible.
+String. The prefix to use for plugin names provided. C<MyApp::Plugin> is sensible.
 
 =head2 _plugin_app_ns
 
-ArrayRef, Accessor automatically dereferences into array on a read call.
-By default will be filled with the class name and its precedents, it is used
+An ArrayRef accessor that automatically dereferences into array on a read call.
+By default it will be filled with the class name and its precedents. It is used
 to determine which directories to look for plugins as well as which plugins
 take precedence upon namespace collisions. This allows you to subclass a pluggable
-class and still use it's plugins while using yours first if they are available.
+class and still use its plugins while using yours first if they are available.
 
 =head2 _plugin_locator
 
@@ -92,7 +93,8 @@ available plugins.
 
 =for stopwords instantiation
 
-Because of the way roles apply C<$self-E<gt>blessed> and C<ref $self> will
+Because of the way roles apply, C<< $self->blessed >>, C<< ref $self >>
+and C<< $self->meta->name >> will
 no longer return what you expect. Instead, upon instantiation, the name of the
 class instantiated will be stored in this attribute if you need to access the
 name the class held before any runtime roles were applied.
