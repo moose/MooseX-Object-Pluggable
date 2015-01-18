@@ -1,3 +1,6 @@
+/.ackrc
 /.build/
-!.gitignore
-/MooseX-Object-Pluggable-*
+!/.gitignore
+/.latest
+/MooseX-Object-Pluggable-*/
+/MooseX-Object-Pluggable-*.tar.gz
