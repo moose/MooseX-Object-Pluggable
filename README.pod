@@ -1,0 +1,251 @@
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+MooseX::Object::Pluggable - Make your classes pluggable
+
+=head1 VERSION
+
+version 0.0014
+
+=head1 SYNOPSIS
+
+    package MyApp;
+    use Moose;
+
+    with 'MooseX::Object::Pluggable';
+
+    ...
+
+    package MyApp::Plugin::Pretty;
+    use Moose::Role;
+
+    sub pretty{ print "I am pretty" }
+
+    1;
+
+    #
+    use MyApp;
+    my $app = MyApp->new;
+    $app->load_plugin('Pretty');
+    $app->pretty;
+
+=head1 DESCRIPTION
+
+This module is meant to be loaded as a role from Moose-based classes.
+It will add five methods and four attributes to assist you with the loading
+and handling of plugins and extensions for plugins. I understand that this may
+pollute your namespace, however I took great care in using the least ambiguous
+names possible.
+
+=head1 How plugins Work
+
+Plugins and extensions are just Roles by a fancy name. They are loaded at runtime
+on demand and are instance, not class based. This means that if you have more than
+one instance of a class they can all have different plugins loaded. This is a feature.
+
+Plugin methods are allowed to C<around>, C<before>, C<after>
+their consuming classes, so it is important to watch for load order as plugins can
+and will overload each other. You may also add attributes through C<has>.
+
+Please note that when you load at runtime you lose the ability to wrap C<BUILD>
+and roles using C<has> will not go through compile time checks like C<required>
+and C<default>.
+
+Even though C<override> will work, I B<STRONGLY> discourage its use
+and a warning will be thrown if you try to use it.
+This is closely linked to the way multiple roles being applied is handled and is not
+likely to change. C<override> behavior is closely linked to inheritance and thus will
+likely not work as you expect it in multiple inheritance situations. Point being,
+save yourself the headache.
+
+=head1 How plugins are loaded
+
+When roles are applied at runtime an anonymous class will wrap your class and
+C<< $self->blessed >>, C<< ref $self >> and C<< $self->meta->name >>
+will no longer return the name of your object;
+they will instead return the name of the anonymous class created at runtime.
+See C<_original_class_name>.
+
+=head1 Usage
+
+For a simple example see the tests included in this distribution.
+
+=head1 Attributes
+
+=head2 _plugin_ns
+
+String. The prefix to use for plugin names provided. C<MyApp::Plugin> is sensible.
+
+=head2 _plugin_app_ns
+
+An ArrayRef accessor that automatically dereferences into array on a read call.
+By default it will be filled with the class name and its precedents. It is used
+to determine which directories to look for plugins as well as which plugins
+take precedence upon namespace collisions. This allows you to subclass a pluggable
+class and still use its plugins while using yours first if they are available.
+
+=head2 _plugin_locator
+
+An automatically built instance of L<Module::Pluggable::Object> used to locate
+available plugins.
+
+=head2 _original_class_name
+
+=for stopwords instantiation
+
+Because of the way roles apply, C<< $self->blessed >>, C<< ref $self >>
+and C<< $self->meta->name >> will
+no longer return what you expect. Instead, upon instantiation, the name of the
+class instantiated will be stored in this attribute if you need to access the
+name the class held before any runtime roles were applied.
+
+=head1 Public Methods
+
+=head2 load_plugins @plugins
+
+=head2 load_plugin $plugin
+
+Load the appropriate role for C<$plugin>.
+
+=head1 Private Methods
+
+There's nothing stopping you from using these, but if you are using them
+for anything that's not really complicated you are probably doing
+something wrong.
+
+=head2 _role_from_plugin $plugin
+
+Creates a role name from a plugin name. If the plugin name is prepended
+with a C<+> it will be treated as a full name returned as is. Otherwise
+a string consisting of C<$plugin>  prepended with the C<_plugin_ns>
+and the first valid value from C<_plugin_app_ns> will be returned. Example
+
+   #assuming appname MyApp and C<_plugin_ns> 'Plugin'
+   $self->_role_from_plugin("MyPlugin"); # MyApp::Plugin::MyPlugin
+
+=head2 _load_and_apply_role @roles
+
+Require C<$role> if it is not already loaded and apply it. This is
+the meat of this module.
+
+=head2 _build_plugin_app_ns
+
+Automatically builds the _plugin_app_ns attribute with the classes in the
+class precedence list that are not part of Moose.
+
+=head2 _build_plugin_locator
+
+Automatically creates a L<Module::Pluggable::Object> instance with the correct
+search_path.
+
+=head2 meta
+
+Keep tests happy. See L<Moose>
+
+=head1 SEE ALSO
+
+L<Moose>, L<Moose::Role>, L<Class::Inspector>
+
+=head1 BUGS
+
+Holler?
+
+Please report any bugs or feature requests to
+C<bug-MooseX-Object-Pluggable at rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org/Public/Dist/Display.html?Name=MooseX-Object-Pluggable>.
+I will be notified, and then you'll automatically be notified of progress on
+your bug as I make changes.
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc MooseX-Object-Pluggable
+
+You can also look for information at:
+
+=for stopwords AnnoCPAN
+
+=over 4
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/MooseX-Object-Pluggable>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/MooseX-Object-Pluggable>
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=MooseX-Object-Pluggable>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/MooseX-Object-Pluggable>
+
+=back
+
+=head1 ACKNOWLEDGEMENTS
+
+=for stopwords Stevan
+
+=over 4
+
+=item #Moose - Huge number of questions
+
+=item Matt S Trout <mst@shadowcatsystems.co.uk> - ideas / planning.
+
+=item Stevan Little - EVERYTHING. Without him this would have never happened.
+
+=item Shawn M Moore - bugfixes
+
+=back
+
+=head1 AUTHOR
+
+Guillermo Roditi <groditi@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2007 by Guillermo Roditi <groditi@cpan.org>.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=head1 CONTRIBUTORS
+
+=for stopwords Karen Etheridge Shawn M Moore Yuval Kogman Robert Boone David Steinbrunner Todd Hepler
+
+=over 4
+
+=item *
+
+Karen Etheridge <ether@cpan.org>
+
+=item *
+
+Shawn M Moore <sartak@gmail.com>
+
+=item *
+
+Yuval Kogman <nothingmuch@woobling.org>
+
+=item *
+
+Robert Boone <robo4288@gmail.com>
+
+=item *
+
+David Steinbrunner <dsteinbrunner@pobox.com>
+
+=item *
+
+Todd Hepler <thepler@employees.org>
+
+=back
+
+=cut

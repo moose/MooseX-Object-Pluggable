@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.0014    2015-01-18 20:38:41Z
           - add a test that runs `moose-outdated`, to make it more obvious
             when there are installation conflicts
 
