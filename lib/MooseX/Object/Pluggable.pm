@@ -289,7 +289,9 @@ Keep tests happy. See L<Moose>
 
 1;
 
-__END__;
+__END__
+
+=pod
 
 =head1 SEE ALSO
 
