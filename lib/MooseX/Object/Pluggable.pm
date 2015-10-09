@@ -1,6 +1,8 @@
 package MooseX::Object::Pluggable;
 # ABSTRACT: Make your classes pluggable
 
+our $VERSION = '0.0015';
+
 use Carp;
 use Moose::Role;
 use Module::Runtime 'use_module';
