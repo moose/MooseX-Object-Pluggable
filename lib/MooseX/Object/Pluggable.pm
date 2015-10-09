@@ -295,22 +295,19 @@ __END__
 
 =head1 SEE ALSO
 
-L<Moose>, L<Moose::Role>, L<Class::Inspector>
+=for :list
+* L<Moose>
+* L<Moose::Role>
+* L<Class::Inspector>
 
 =head1 ACKNOWLEDGEMENTS
 
 =for stopwords Stevan
 
-=over 4
-
-=item #Moose - Huge number of questions
-
-=item Matt S Trout <mst@shadowcatsystems.co.uk> - ideas / planning.
-
-=item Stevan Little - EVERYTHING. Without him this would have never happened.
-
-=item Shawn M Moore - bugfixes
-
-=back
+=for :list
+* #Moose - Huge number of questions
+* Matt S Trout <mst@shadowcatsystems.co.uk> - ideas / planning.
+* Stevan Little - EVERYTHING. Without him this would have never happened.
+* Shawn M Moore - bugfixes
 
 =cut
