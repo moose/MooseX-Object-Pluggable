@@ -295,46 +295,6 @@ __END__;
 
 L<Moose>, L<Moose::Role>, L<Class::Inspector>
 
-=head1 BUGS
-
-Holler?
-
-Please report any bugs or feature requests to
-C<bug-MooseX-Object-Pluggable at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/Public/Dist/Display.html?Name=MooseX-Object-Pluggable>.
-I will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc MooseX-Object-Pluggable
-
-You can also look for information at:
-
-=for stopwords AnnoCPAN
-
-=over 4
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/MooseX-Object-Pluggable>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/MooseX-Object-Pluggable>
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=MooseX-Object-Pluggable>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/MooseX-Object-Pluggable>
-
-=back
-
 =head1 ACKNOWLEDGEMENTS
 
 =for stopwords Stevan
